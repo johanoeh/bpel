@@ -1,0 +1,46 @@
+<process name="Main"
+    targetNamespace="http://hello/test" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://hello/test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:hello="http://hello/test.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+    
+
+    <import location="main.wsdl"
+        namespace="http://hello/test.wsdl"
+        importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+    
+    <partnerLinks>
+        <partnerLink name="helloPartnerLink" 
+            partnerLinkType="hello:HelloPartnerLinkType" 
+            myRole="helloResponder" />
+    </partnerLinks>
+    
+
+    <variables>
+        <variable name="helloVar" messageType="hello:HelloMessage"/>
+    </variables>
+    
+    <sequence>
+        <receive
+            name="start"
+            partnerLink="helloPartnerLink"
+            portType="hello:HelloPortType"
+            operation="sayHello"
+            variable="helloVar"
+            createInstance="yes"/>
+        
+
+        <reply name="end"  
+            partnerLink="helloPartnerLink"
+            portType="hello:HelloPortType" 
+            operation="sayHello"
+            variable="helloVar"/>
+    </sequence> 
+    
+</process>
+
+
