@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions 
+    targetNamespace="http://telia/testreserve.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://telia/testreserve.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+    
+    <!--  Types declared here -->
+    
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://telia/testreserve.wsdl">
+            <xsd:element name="message">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    
+    <wsdl:message name="TeliaMessage">
+        <wsdl:part name="message" element="tns:message"/>
+    </wsdl:message>
+    
+    <wsdl:portType name="ReservePortType">
+        <wsdl:operation name="test">
+            <wsdl:input message="tns:TeliaMessage" name="TestIn"/>
+            <wsdl:output message="tns:TeliaMessage" name="TestOut"/>
+        </wsdl:operation>    
+    </wsdl:portType>
+    
+    <wsdl:binding name="ReserveSoapBinding" type="tns:ReservePortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="test">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body
+                    namespace="http://telia/testreserve.wsdl"
+                    use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    namespace="http://telia/testreserve.wsdl" 
+                    use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="NumberService">
+        <wsdl:port name="NumberPort" binding="tns:ReserveSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
+        </wsdl:port>
+    </wsdl:service>
+    
+    <plnk:partnerLinkType name="ReservePartnerLinkType">
+        <plnk:role name="me" portType="tns:ReservePortType"/>
+        <plnk:role name="you" portType="tns:ReservePortType"/>
+    </plnk:partnerLinkType>
+</wsdl:definitions>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Body>
+    <ns1:numberRequest xmlns:ns1="http://telia/test.wsdl">
+      <MSISDN xmlns="">
+        <id>1</id>
+        <number>4643793888</number>
+        <streetAddress>Genvägen 14</streetAddress>
+        <zipCode>84093</zipCode>
+        <city>Sundsvall</city>
+      </MSISDN>
+    </ns1:numberRequest>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

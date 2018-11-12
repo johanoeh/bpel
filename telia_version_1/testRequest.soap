@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Body>
+    <ns1:sayHello xmlns:ns1="http://hello/test.wsdl">
+      <message xmlns="">Hello world</message>
+    </ns1:sayHello>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+

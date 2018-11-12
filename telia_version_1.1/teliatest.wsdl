@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions 
+    targetNamespace="http://telia/test.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://telia/test.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+
+    <wsdl:message name="TeliaMessage">
+        <wsdl:part name="message" type="xsd:string"/>
+    </wsdl:message>
+    
+    <wsdl:portType name="TeliaPortType">
+        <wsdl:operation name="test">
+            <wsdl:input message="tns:TeliaMessage" name="TestIn"/>
+            <wsdl:output message="tns:TeliaMessage" name="TestOut"/>
+        </wsdl:operation>    
+    </wsdl:portType>
+    
+    <wsdl:binding name="TeliaSoapBinding" type="tns:TeliaPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="test">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body
+                    namespace="http://telia/test.wsdl"
+                    use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    namespace="http://telia/test.wsdl" 
+                    use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="NumberService">
+		<wsdl:port name="NumberPort" binding="tns:TeliaSoapBinding">
+     		<soap:address location="http://localhost:8080/ode/processes/telia"/>
+		</wsdl:port>
+    </wsdl:service>
+    
+   <plnk:partnerLinkType name="HelloPartnerLinkType">
+       <plnk:role name="me" portType="tns:TeliaPortType"/>
+       <plnk:role name="you" portType="tns:TeliaPortType"/>
+   </plnk:partnerLinkType>
+</wsdl:definitions>
+

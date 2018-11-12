@@ -1,0 +1,27 @@
+<!--
+  -->
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
+  xmlns:pnsr="http://telia/testreserve" 
+  xmlns:pnsm="http://telia/reservemain" 
+  xmlns:main="http://telia/reservemain.wsdl"
+  xmlns:wns="http://telia/testreserve.wsdl">
+
+	<process name="pnsm:main">
+		<provide partnerLink="reserveMainPartnerLink">
+			<service name="main:ReserveMain" port="ReserveMainPort"/>
+		</provide>
+		 <invoke partnerLink="reserveResponderPartnerLink">
+			<service name="wns:ReserveService" port="ReservePort"/>
+		</invoke>
+	</process>
+	
+	<process name="pnsr:reserve">
+		<!--<in-memory>true</in-memory>
+		<type>wns:ReservePartnerLinkType</type> -->
+		<provide partnerLink="reservePartnerLink">
+			<service name="wns:ReserveService" port="ReservePort"/>
+		</provide>
+	</process>
+	
+
+</deploy>

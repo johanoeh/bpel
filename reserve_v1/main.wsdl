@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions 
+    targetNamespace="http://telia/reservemain.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://telia/reservemain.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+    
+    <!--  Types declared here -->
+    
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://telia/reservemain.wsdl">
+            <xsd:element name="message">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    
+    <!-- Messages exchanged declared here -->
+    <wsdl:message name="ReserveMessage">
+        <wsdl:part name="message" type="xsd:string"/>
+    </wsdl:message>
+    
+    <!-- 
+        Portype is an abstract declaration of a port and name of operation(s).
+        And the messages exchanged.
+    -->
+    <wsdl:portType name="ReserveMainPortType">
+        <wsdl:operation name="test">
+            <wsdl:input message="tns:ReserveMessage" name="TestIn"/>
+            <wsdl:output message="tns:ReserveMessage" name="TestOut"/>
+        </wsdl:operation>    
+    </wsdl:portType>
+    
+    <!-- Concrete bindinginformation declared here protocol, style, use literal/document of importance -->
+    <wsdl:binding name="ReserveMainSoapBinding" type="tns:ReserveMainPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="test">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body
+                    namespace="http://telia/reservemain.wsdl"
+                    use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    namespace="http://telia/reservemain.wsdl" 
+                    use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    
+    <!-- 
+        Service declaration with port = name used together with address to locate service 
+    -->
+    <wsdl:service name="ReserveMain">
+        <wsdl:port name="ReserveMainPort" binding="tns:ReserveMainSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/main"/>
+        </wsdl:port>
+    </wsdl:service>
+    
+    <plnk:partnerLinkType name="ReserveMainPartnerLinkType">
+        <plnk:role name="mainResponder" portType="tns:ReserveMainPortType"/>
+        <plnk:role name="mainRequester" portType="tns:ReserveMainPortType"/>
+    </plnk:partnerLinkType>
+    
+</wsdl:definitions>

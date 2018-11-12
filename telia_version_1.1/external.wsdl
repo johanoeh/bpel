@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions 
+    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" 
+    xmlns:wsp="http://www.w3.org/ns/ws-policy" 
+    xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy" 
+    xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" 
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:tns="http://telia.se/"
+    xmlns:telia="http://www.telia.se"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns="http://schemas.xmlsoap.org/wsdl/" 
+    targetNamespace="http://telia.se/" 
+    name="MessageService">
+    
+    <types>
+        <xs:schema  
+            xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
+            xmlns:telia="http://www.telia.se"
+            targetNamespace="http://www.telia.se">
+            <xs:element name="message" type="telia:message"/>
+            <xs:element name="messageResponse" type="telia:messageResponse"/>
+            <xs:complexType name="message">
+                <xs:sequence>
+                    <xs:element name="arg0" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="messageResponse">
+                <xs:sequence>
+                    <xs:element name="return" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </types>
+    
+    <message name="message">
+        <part name="parameters" element="telia:message"/>
+    </message>
+    
+    <message name="messageResponse">
+        <part name="parameters" element="telia:messageResponse"/>
+    </message>
+    
+    <portType name="MessageService">
+        <operation name="message">
+            <input  message="tns:message"/>
+            <output  message="tns:messageResponse"/>
+        </operation>
+    </portType>
+    
+    <binding 
+        name="MessagePortBinding" 
+        type="tns:MessageService">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
+        <operation name="message">
+            <soap:operation soapAction=""></soap:operation>
+            <input>
+                <soap:body use="literal"></soap:body>
+            </input>
+            <output>
+                <soap:body use="literal"></soap:body>
+            </output>
+        </operation>
+    </binding>
+    
+    <service name="MessageService">
+        <port name="MessagePort" binding="tns:MessagePortBinding">
+            <soap:address location="http://localhost:8088/ws"></soap:address>
+        </port>
+    </service>
+    
+  
+    <plnk:partnerLinkType name="TeliaPartnerLinktype">
+        <plnk:role name="me" portType="tns:MessageService"/>
+        <plnk:role name="you" portType="tns:MessageService"/>
+   </plnk:partnerLinkType>
+    
+</definitions>
+

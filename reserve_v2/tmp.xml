@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence>
+    <receive
+        name="start"
+        partnerLink="reserveMainPartnerLink"
+        portType="main:ReserveMainPortType"
+        operation="test"
+        variable="myVar1"
+        createInstance="yes"/>
+    
+    
+    <assign name="assign1">
+        <copy>
+            <from variable="myVar1" part="message"/>
+            <to variable="tmpVar"/>
+        </copy>
+        <copy>
+            <from>concat($tmpVar,' : main')</from>
+            <to variable="sendVar" part="message"/>
+        </copy>
+    </assign>
+    
+    <invoke name="test" 
+        partnerLink="reserveResponderPartnerLink" 
+        portType="test:ReservePortType" 
+        operation="test" 
+        inputVariable="sendVar"
+        outputVariable="receiveVar"
+    />
+    
+    <assign name="assign2">
+        <copy>
+            <from variable="receiveVar" part="message"/>
+            <to variable="myVar1" part="message"/>
+        </copy>
+    </assign>
+    
+    <reply name="end"  
+        partnerLink="reserveMainPartnerLink"
+        portType="main:ReserveMainPortType" 
+        operation="test"
+        variable="myVar1"/>
+</sequence> 
+

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process name="main"
+    targetNamespace="http://telia/reservemain" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://telia/reservemain"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://telia/testreserve.wsdl"
+    xmlns:main="http://telia/reservemain.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+    
+     <import location="reserve.wsdl"
+        namespace="http://telia/testreserve.wsdl"
+        importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+    <import location="main.wsdl"
+        namespace="http://telia/reservemain.wsdl"
+        importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+    
+    <partnerLinks>
+
+        <partnerLink name="reserveMainPartnerLink" 
+            partnerLinkType="main:ReserveMainPartnerLinkType" 
+            myRole="mainResponder" />
+        
+        <partnerLink name="reserveResponderPartnerLink" 
+            partnerLinkType="test:ReservePartnerLinkType" 
+            partnerRole="reserveResponder" initializePartnerRole="yes" />
+        
+    </partnerLinks>
+    
+    
+    <variables>
+        <variable name="testReserveVar" messageType="test:ReserveMessage"/>
+        <variable name="testMainVar" messageType="main:ReserveMessage"/>
+        <variable name="tmpVar" type="xsd:string"/>
+    </variables>
+    
+    <sequence>
+        <receive
+            name="start"
+            partnerLink="reserveMainPartnerLink"
+            portType="main:ReserveMainPortType"
+            operation="test"
+            variable="testMainVar"
+            createInstance="yes"/>
+        
+        <assign name="assign1">
+            <copy>
+                <from variable="testMainVar" part="message"/>
+                <to variable="tmpVar"/>
+            </copy>
+            <copy>
+                <from>concat($tmpVar,' : main')</from>
+                <to variable="testReserveVar" part="message"/>
+            </copy>
+        </assign>
+        
+        <invoke name="test" partnerLink="reserveResponderPartnerLink" 
+            portType="test:ReservePortType" operation="test" inputVariable="testReserveVar"
+            outputVariable="testReserveVar"
+        />
+        
+        <assign name="assign2">
+            <copy>
+                <from variable="myVar" part="message"/>
+                <to variable="testMainVar" part="message"/>
+            </copy>
+        </assign>
+        
+        
+        <reply name="end"  
+            partnerLink="reserveMainPartnerLink"
+            portType="main:ReserveMainPortType" 
+            operation="test"
+            variable="testMainVar"/>
+    </sequence> 
+</process>
+

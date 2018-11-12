@@ -1,0 +1,54 @@
+<process name="reserve"
+    targetNamespace="http://telia/testreserve" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://telia/testreserve"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://telia/testreserve.wsdl"
+    xmlns:main="http://telia/reservemain.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+  <import location="reserve.wsdl"
+     namespace="http://telia/testreserve.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+
+   <partnerLinks>  
+       <partnerLink name="reservePartnerLink" 
+         partnerLinkType="test:ReservePartnerLinkType" 
+         myRole="reserveResponder"/>
+   </partnerLinks>
+
+    
+   <variables>
+     <variable name="myVar" messageType="test:ReserveMessage"/>
+     <variable name="tmpVar" type="xsd:string"/>
+   </variables>
+    
+   <sequence>
+       <receive
+          name="start"
+          partnerLink="reservePartnerLink"
+          portType="test:ReservePortType"
+          operation="test"
+          variable="myVar"
+          createInstance="yes"/>
+
+      <assign name="assign1">
+          <copy>
+              <from variable="myVar" part="message"/>
+              <to variable="tmpVar"/>
+          </copy>
+          <copy>
+              <from>concat($tmpVar,' : reserved')</from>
+              <to variable="myVar" part="message"/>
+          </copy>
+      </assign>
+       
+     <reply name="end"  
+            partnerLink="reservePartnerLink"
+            portType="test:ReservePortType" 
+            operation="test"
+            variable="myVar"/>
+   </sequence> 
+</process>

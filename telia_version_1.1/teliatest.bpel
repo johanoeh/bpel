@@ -1,0 +1,124 @@
+<process name="TeliaMain"
+    targetNamespace="http://telia/test" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://telia/test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://telia/test.wsdl"
+    xmlns:telia="http://telia.se/"
+    xmlns:telia2="http://telia.se"
+    xmlns:ode="http://www.apache.org/ode/type/extension"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+  <import location="teliatest.wsdl"
+     namespace="http://telia/test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+    
+    <import location="external.wsdl"
+        namespace="http://www.telia.se/"
+        importType="http://schemas.xmlsoap.org/wsdl/" />
+
+   <partnerLinks>
+      <partnerLink name="helloPartnerLink" 
+         partnerLinkType="test:HelloPartnerLinkType" 
+         myRole="me" />
+       
+       <partnerLink name="teliaPartnerLink"
+           partnerLinkType="telia:TeliaPartnerLinktype"
+           partnerRole="me" initializePartnerRole="yes"
+         />
+   </partnerLinks>
+    
+   <variables>
+     <!-- var used to store request -->  
+     <variable name="helloVar" messageType="test:TeliaMessage"/>
+     <!--tmp var for message manipulation -->
+     <variable name="tmpVar" type="xsd:string"/>
+     <!-- message used by external service (request) -->
+     <variable name="xxMSG" element="telia2:message"/>
+       
+     <!-- message used for soap request "wraps" xxxMSG"-->
+     <variable name="extRequestMessage" messageType="telia:message"/>
+     <!-- Message used for soapresponse -->
+     <variable name="extResponseMessage" messageType="telia:messageResponse"/>
+     <variable name="xxMSGResponse" element="telia2:messageResponse"/> 
+   </variables>
+    
+    <sequence>
+
+        <!-- Literal assignment used to initialize variable -->
+        <assign name="assign0">
+            <copy>
+                <from>
+                    <!-- 
+                        To prevent xmlns to be set to http://www.telia.se (causes Reponding service to interpret arg0 as null)
+                        xmlns="" is added
+                    -->
+                    <literal>
+                        <ns1:message xmlns:ns1="http://www.telia.se" xmlns=""> 
+                            <arg0 xmlns=""></arg0>
+                        </ns1:message>
+                    </literal>
+                </from>
+                <to variable="xxMSG"/>
+            </copy>
+        </assign>
+        <!-- recieve  message from partner -->
+        <receive
+            name="start"
+            partnerLink="helloPartnerLink"
+            portType="test:TeliaPortType"
+            operation="test"
+            variable="helloVar"
+            createInstance="yes"/>
+       
+        <assign name="assign01">
+            <!-- copy the  part message  to tmp var concat from ode-->
+            <copy>
+                <from variable="helloVar" part="message"/>
+                <to variable="tmpVar"/>
+            </copy>
+             <copy>
+                <from>concat($tmpVar,' from ODE and ')</from>
+                <to>$tmpVar</to>
+            </copy>
+            
+            <!--copy from tmpVar to element arg0 of message -->
+            <copy>
+                <from>$tmpVar</from>
+                <to>$xxMSG/arg0</to>
+            </copy>
+            <!-- copy to requestmessage -->
+            <copy>
+                <from>$xxMSG</from>
+                <to>$extRequestMessage.parameters</to>
+            </copy>
+        </assign>
+        <!-- invoke external webservice with extRequestMessage as input and extResponseMessage as output -->
+        <invoke name="message" partnerLink="teliaPartnerLink" 
+            portType="telia:MessageService" operation="message" inputVariable="extRequestMessage"
+            outputVariable="extResponseMessage"
+        />
+        <!-- compose final message with content from booth this process and webservice -->
+        <assign name="assign02">
+            <!-- copy response from external webservice to tmpVar (xsd:string)-->
+            <copy>
+                <from>$extResponseMessage.parameters/return</from>
+                <to variable="tmpVar"/>
+            </copy>
+            <!-- copy from tmpVar to helloVar (the response message)-->
+            <copy>
+                <from>concat('Hello! ' , $tmpVar)</from>
+                <to variable="helloVar" part="message"/>
+            </copy>
+        </assign>
+        
+        <!-- Send reply to caller -->
+        <reply name="end"  
+            partnerLink="helloPartnerLink"
+            portType="test:TeliaPortType" 
+            operation="test"
+            variable="helloVar"/>
+    </sequence> 
+    
+</process>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions 
+    targetNamespace="http://telia/test.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://telia/test.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+    
+    <wsdl:types>
+        
+
+        <xsd:schema targetNamespace="http://telia/test.wsdl">
+            <!-- 
+              Element  with same name as the service operation name
+              wraps the data type this allows validating of the soap
+              body content......
+           --> 
+            
+            <xsd:element name="MSISDN" type="tns:msisdn"/>
+            
+            <xsd:element name="numberRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="MSISDN" type="tns:msisdn"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="numberResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="MSISDN" type="tns:msisdn"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:complexType name="msisdn">
+                <xsd:sequence>
+                    <xsd:element name="id" type="xsd:string"/>
+                    <xsd:element name="number" type="xsd:string"/>
+                    <xsd:element name="streetAddress" type="xsd:string"/>
+                    <xsd:element name="zipCode" type="xsd:string"/>
+                    <xsd:element name="city" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+        </xsd:schema>
+
+    </wsdl:types>
+    
+    <wsdl:message name="TeliaMessage">
+        <wsdl:part name="message" element="tns:numberRequest"/>
+    </wsdl:message>
+    
+    <wsdl:message name="TeliaResponseMessage">
+        <wsdl:part name="teliaReponseMessage" element="tns:numberResponse"></wsdl:part>
+    </wsdl:message>
+    
+    <wsdl:portType name="TeliaPortType">
+        <wsdl:operation name="test">
+            <wsdl:input message="tns:TeliaMessage" name="TestIn"/>
+            <wsdl:output message="tns:TeliaResponseMessage" name="TestOut"/>
+        </wsdl:operation>    
+    </wsdl:portType>
+    
+     <wsdl:binding name="TeliaSoapBinding" type="tns:TeliaPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="test">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input>
+                <soap:body
+                    namespace="http://telia/test.wsdl"
+                    use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    namespace="http://telia/test.wsdl" 
+                    use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="NumberService">
+		<wsdl:port name="NumberPort" binding="tns:TeliaSoapBinding">
+     		<soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
+		</wsdl:port>
+    </wsdl:service>
+    
+   <plnk:partnerLinkType name="TeliaPartnerLinkType">
+       <plnk:role name="me" portType="tns:TeliaPortType"/>
+       <plnk:role name="you" portType="tns:TeliaPortType"/>
+   </plnk:partnerLinkType>
+</wsdl:definitions>
+

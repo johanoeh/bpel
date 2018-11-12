@@ -1,0 +1,58 @@
+<process name="TeliaTest"
+    targetNamespace="http://telia/test" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://telia/test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://telia/test.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+  <import location="teliatest.wsdl"
+     namespace="http://telia/test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+    
+   <!-- -->
+   <partnerLinks>
+      <partnerLink name="teliaPartnerLink" 
+         partnerLinkType="test:TeliaPartnerLinkType" 
+         myRole="me" />
+   </partnerLinks>
+    
+   <variables>
+     <variable name="messageVar" messageType="test:TeliaMessage"/>
+     <variable name="responseVar" messageType="test:TeliaResponseMessage"/>
+     <variable name="msisdn" element="test:MSISDN"/>
+     <variable name="responseMessage" element="test:NumberResponse"/>
+   </variables>
+
+   <sequence>
+       <receive
+          name="start"
+          partnerLink="teliaPartnerLink"
+          portType="test:TeliaPortType"
+          operation="test"
+          variable="messageVar"
+          createInstance="yes"/>
+     
+      <assign name="assign1">
+          <copy>
+              <from variable="messageVar" part="message"/>
+              <to variable="msisdn"/>
+          </copy>
+          <copy>
+              <from>$msisdn</from>
+              <to variable="responseMessage" element="MSISDN"/>
+          </copy>
+          <copy> 
+              <from variable="responseMessage"/>
+              <to variable="responseVar" part="teliaReponseMessage"></to>
+          </copy>
+      </assign>
+       
+       <reply name="end"  
+              partnerLink="teliaPartnerLink"
+              portType="test:TeliaPortType" 
+              operation="test"
+              variable="responseVar"/>
+   </sequence> 
+</process>

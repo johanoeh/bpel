@@ -1,0 +1,52 @@
+<process name="Hello"
+    targetNamespace="http://hello/test" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://hello/test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:hello="http://hello/test.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+    
+    <!-- Import hello.wsdl notice namespace  "http://hello/test.wsdl" 
+         and that there is a namespace prefic hello declared -->
+   <import location="hello.wsdl"
+     namespace="http://hello/test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+  
+   <partnerLinks>
+       <!-- Declares a partnerLink and it's type-->
+      <partnerLink name="helloPartnerLink" 
+         partnerLinkType="hello:HelloPartnerLinkType" 
+         myRole="helloResponder" />
+   </partnerLinks>
+    
+   <!-- variables declares here -->
+   <variables>
+       <!-- 
+           Declares helloVar of messageType, 
+           the message is declared in hello.wsdl 
+       -->
+     <variable name="helloVar" messageType="hello:HelloMessage"/>
+   </variables>
+
+   <sequence>
+       
+       <!-- Recieve request message from client  store result in helloVar -->
+       <receive
+          name="start"
+          partnerLink="helloPartnerLink"
+          portType="hello:HelloPortType"
+          operation="sayHello"
+          variable="helloVar"
+          createInstance="yes"/>
+
+      <!-- Send echo reply to client using  then recieved message stored in helloVar -->
+       <reply name="end"  
+              partnerLink="helloPartnerLink"
+              portType="hello:HelloPortType" 
+              operation="sayHello"
+              variable="helloVar"/>
+   </sequence> 
+    
+</process>
