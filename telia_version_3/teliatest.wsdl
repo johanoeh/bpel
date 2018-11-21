@@ -9,7 +9,6 @@
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
     
     <wsdl:types>
-        
 
         <xsd:schema targetNamespace="http://telia/test.wsdl">
             <!-- 

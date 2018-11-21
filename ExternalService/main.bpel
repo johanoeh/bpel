@@ -1,46 +1,183 @@
 <process name="Main"
-    targetNamespace="http://hello/test" 
+    targetNamespace="http://order/test" 
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-    xmlns:tns="http://hello/test"
+    xmlns:tns="http://order/test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:hello="http://hello/test.wsdl"
-    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+    xmlns:order="http://order/test.wsdl"
+    xmlns:external="http://order/external/test.wsdl"
+    xmlns:ode="http://www.apache.org/ode/type/extension"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions"
+      queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+      expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
     
 
     <import location="main.wsdl"
-        namespace="http://hello/test.wsdl"
+        namespace="http://order/test.wsdl"
+        importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+    <import location="external.wsdl"
+        namespace="http://order/external/test.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
     
     
     <partnerLinks>
-        <partnerLink name="helloPartnerLink" 
-            partnerLinkType="hello:HelloPartnerLinkType" 
-            myRole="helloResponder" />
+        
+        <partnerLink name="orderPartnerLink" 
+            partnerLinkType="order:OrderPartnerLinkType" 
+            myRole="orderResponder" />
+        
+        <partnerLink name="externalOrderPartnerLink"
+            partnerLinkType="external:ExternalOrderPartnerLinkType"
+            partnerRole="orderReponder" initializePartnerRole="yes"/>
+        
     </partnerLinks>
     
 
     <variables>
-        <variable name="helloVar" messageType="hello:HelloMessage"/>
+        <variable name="helloVar" messageType="order:HelloMessage"/>
+        <variable name="orderVar" messageType="order:order"></variable>
+        <variable name="orderElem" element="order:order"/>
+        <variable name="sendOrderRequest" messageType="external:sendOrder"/>
+        <variable name="sendOrderResponse" messageType="external:sendOrderResponse"/>
+        <variable name="sendOrderResponseElem" element="external:sendOrderRespones"></variable>
+        <variable name="sendOrderElem" element="external:sendOrder"/>
+        <variable name="order" element="external:order"/>
+        <variable name="orderSpec" element="order:orderSpec"></variable>
     </variables>
     
-    <sequence>
-        <receive
-            name="start"
-            partnerLink="helloPartnerLink"
-            portType="hello:HelloPortType"
-            operation="sayHello"
-            variable="helloVar"
-            createInstance="yes"/>
-        
+    <flow>   
+        <sequence>
+            <!-- 
+                literal assignment used to initialize variable
+                The complex types are all  a part of the namespace {http://order/external/test.wsdl} 
+            -->
+            <assign name="init_variables">
+                
+            <copy name="init_sendOrderRequest">
+              <from>
+                  <literal>
+                      <ns1:sendOrder xmlns:ns1="http://order/external/test.wsdl">
+                      </ns1:sendOrder>
+                  </literal>
+              </from>
+              <to variable="sendOrderRequest" part="parameters"/>
+            </copy>
+            <copy name="init_send_order">
+               <from>
+                    <literal>
+                        <ns1:sendOrder xmlns:ns1="http://order/external/test.wsdl">
+                            <order>
+                                <orderSpec>
+                                    <orderID></orderID>
+                                    <customerID></customerID>
+                                    <itemName></itemName>
+                                    <price></price>
+                                </orderSpec>
+                            </order>
+                        </ns1:sendOrder>
+                    </literal>
+                </from>
+                <to variable="sendOrderElem"/>
+            </copy> 
+            <copy name="init_order">
+                <from>
+                    <literal> 
+                        <ns1:order xmlns:ns1="http://order/external/test.wsdl" >
+                            <ns1:orderSpec xmlns="">
+                                <orderID>[string]</orderID>
+                                <customerID>[string]</customerID>
+                                <itemName>[string]</itemName>
+                                <price>[string]</price>
+                            </ns1:orderSpec>
+                        </ns1:order> 
+                    </literal>
+                </from>
+                <to variable="order"/>
+            </copy>
+            <copy name="init_orderElement">
+                <from>
+                    <literal>
+                        <ns1:order xmlns:ns1="http://order/test.wsdl">         
+                        </ns1:order>
+                    </literal>
+                </from>
+                <to variable="orderElem"/>
+            </copy>   
+            <copy name="init_sendOrderReponse">
+                <from>
+                    <literal>
+                        <sendOrderResponse xmlns="http://order/external/test.wsdl">             
+                        </sendOrderResponse>
+                    </literal>
+                </from>
+                <to variable="sendOrderResponseElem"/>
+            </copy>
 
-        <reply name="end"  
-            partnerLink="helloPartnerLink"
-            portType="hello:HelloPortType" 
-            operation="sayHello"
-            variable="helloVar"/>
-    </sequence> 
+            </assign>
+            
+            <receive
+                name="start"
+                partnerLink="orderPartnerLink"
+                portType="order:OrderPortType"
+                operation="sendOrder"
+                variable="orderVar"
+                createInstance="yes"/>
+            
+            <!-- rember the assign tag otherwise copy statement will not get evaluated and no error is thrown  -->
+            <assign name="copy_request">
+                <copy>
+                    <from>ode:insert-as-last-into( $sendOrderElem, $orderVar.parameters)</from>
+                    <to variable="sendOrderRequest" part="parameters"/>
+                </copy>
+            </assign>
+            
+            <invoke 
+                name="invokeExternalOrder"
+                partnerLink="externalOrderPartnerLink"
+                operation="sendOrder"
+                inputVariable="sendOrderRequest"
+                outputVariable="sendOrderResponse"
+             />
+            
+             <assign>
+                <copy>
+                    <from>$sendOrderResponse.parameters</from>
+                    <to>$sendOrderResponseElem</to>
+                </copy>
+                 <copy>
+                     <from>$sendOrderResponseElem/order</from>
+                     <to>$sendOrderResponseElem/order</to>
+                 </copy> 
+             </assign>
+            
+
+            <reply name="end"  
+                partnerLink="orderPartnerLink"
+                portType="order:OrderPortType" 
+                operation="sendOrder"
+                variable="orderVar"/>
+        </sequence> 
+        
+        
+      
+        <sequence>
+            <receive
+                name="start"
+                partnerLink="orderPartnerLink"
+                portType="order:OrderPortType"
+                operation="sayHello"
+                variable="helloVar"
+                createInstance="yes"/>
+            
     
+            <reply name="end"  
+                partnerLink="orderPartnerLink"
+                portType="order:OrderPortType" 
+                operation="sayHello"
+                variable="helloVar"/>
+        </sequence> 
+  </flow>
+
 </process>
 
 

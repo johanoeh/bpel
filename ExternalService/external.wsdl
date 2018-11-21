@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<definitions xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" 
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+             xmlns:tns="http://order/external/test.wsdl" 
+             xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+             xmlns="http://schemas.xmlsoap.org/wsdl/" 
+             targetNamespace="http://order/external/test.wsdl" 
+             name="OrderServiceImplService"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+    
+    <types>  
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+            elementFormDefault="qualified" version="1.0" 
+            targetNamespace="http://order/external/test.wsdl">
+            
+            <xs:element name="sendOrder" type="tns:sendOrder"/>
+            <xs:element name="sendOrderResponse" type="tns:sendOrderResponse"/>
+            
+            <xs:element name="order">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="orderSpec" type="tns:orderSpec"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            
+            
+            <xs:complexType name="sendOrder">
+                <xs:sequence>
+                    <xs:element ref="tns:order" minOccurs="0"/>
+                </xs:sequence>
+            </xs:complexType>
+            
+            <xs:complexType name="orderSpec">
+                <xs:sequence>
+                    <xs:element name="orderID" type="xs:string"/>
+                    <xs:element name="customerID" type="xs:string"/>
+                    <xs:element name="itemName" type="xs:string"/>
+                    <xs:element name="price" type="xsd:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            
+            <xs:complexType name="sendOrderResponse">
+                <xs:sequence>
+                    <xs:element ref="tns:order" minOccurs="0"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </types>
+    
+    <message name="sendOrder">
+         <part name="parameters" element="tns:sendOrder"/>
+    </message>
+    
+    <message name="sendOrderResponse">
+         <part name="parameters" element="tns:sendOrderResponse"/>
+    </message>
+    
+    <portType name="OrderService">
+        <operation name="sendOrder">
+        <input message="tns:sendOrder" name="OrderInput"/>
+        <output message="tns:sendOrderResponse" name="OrderOutput"/>
+        </operation>
+    </portType>
+    
+    <binding name="OrderServiceImplPortBinding" type="tns:OrderService">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <operation name="sendOrder">
+         <soap:operation soapAction=""/>
+         <input>
+             <soap:body use="literal"/>
+         </input>
+         <output>
+            <soap:body use="literal"/>
+         </output>
+        </operation>
+    </binding>
+    
+    <service name="OrderServiceImplService">
+        <port name="OrderServiceImplPort" binding="tns:OrderServiceImplPortBinding">
+            <soap:address location="http://localhost:8088/order/ws"/>
+        </port>
+    </service>
+
+    <plnk:partnerLinkType name="ExternalOrderPartnerLinkType">
+        <plnk:role name="orderReponder" portType="tns:OrderService"/>
+        <plnk:role name="orderRequester" portType="tns:OrderService"/>
+    </plnk:partnerLinkType>
+
+</definitions>
