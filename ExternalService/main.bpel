@@ -34,6 +34,7 @@
     
 
     <variables>
+        <variable name="tmpVar" type="xsd:string"/>
         <variable name="helloVar" messageType="order:HelloMessage"/>
         <variable name="orderVar" messageType="order:order"></variable>
         <variable name="orderElem" element="order:order"/>
@@ -41,9 +42,11 @@
         <variable name="sendOrderResponse" messageType="external:sendOrderResponse"/>
         <variable name="sendOrderResponseElem" element="external:sendOrderRespones"></variable>
         <variable name="sendOrderElem" element="external:sendOrder"/>
+        <variable name="tmp" type="xsd:string"/>
         <variable name="order" element="external:order"/>
-        <variable name="orderSpec" element="order:orderSpec"></variable>
+        <variable name="orderSpec" element="external:orderSpec"/>
     </variables>
+    
     
     <flow>   
         <sequence>
@@ -65,20 +68,22 @@
             <copy name="init_send_order">
                <from>
                     <literal>
-                        <ns1:sendOrder xmlns:ns1="http://order/external/test.wsdl">
-                            <order>
-                                <orderSpec>
-                                    <orderID></orderID>
-                                    <customerID></customerID>
-                                    <itemName></itemName>
-                                    <price></price>
-                                </orderSpec>
-                            </order>
-                        </ns1:sendOrder>
+                        <ns2:sendOrder xmlns="http://order/external/test.wsdl" xmlns:ns2="http://order/external/test.wsdl">
+                            <!-- Optional -->
+                            <ns2:order>
+                                <ns2:orderSpec xmlns="">
+                                    <orderID>[string]</orderID>
+                                    <customerID>[string]</customerID>
+                                    <itemName>[string]</itemName>
+                                    <price>[string]</price>
+                                </ns2:orderSpec>
+                            </ns2:order>
+                        </ns2:sendOrder>
                     </literal>
                 </from>
                 <to variable="sendOrderElem"/>
             </copy> 
+     
             <copy name="init_order">
                 <from>
                     <literal> 
@@ -94,10 +99,19 @@
                 </from>
                 <to variable="order"/>
             </copy>
+                
             <copy name="init_orderElement">
                 <from>
                     <literal>
-                        <ns1:order xmlns:ns1="http://order/test.wsdl">         
+                        <ns1:order xmlns:ns1="http://order/test.wsdl">
+                            <order>
+                                <orderSpec>
+                                    <orderID>[string]</orderID>
+                                    <customerID>[string]</customerID>
+                                    <itemName>[string]</itemName>
+                                    <price>[string]</price>
+                                </orderSpec>
+                            </order>
                         </ns1:order>
                     </literal>
                 </from>
@@ -126,7 +140,27 @@
             <!-- rember the assign tag otherwise copy statement will not get evaluated and no error is thrown  -->
             <assign name="copy_request">
                 <copy>
-                    <from>ode:insert-as-last-into( $sendOrderElem, $orderVar.parameters)</from>
+                    <from variable="orderVar" part="order"/>
+                    <to>$orderElem</to>
+                </copy>
+                <copy>
+                    <from>$orderElem/orderSpec/orderID</from>
+                    <to>$sendOrderElem/external:order/external:orderSpec/orderID</to>
+                </copy>
+                <copy>
+                    <from>$orderElem/orderSpec/customerID</from>
+                    <to>$sendOrderElem/external:order/external:orderSpec/customerID</to>
+                </copy>
+                <copy>
+                    <from>$orderElem/orderSpec/itemName</from>
+                    <to>$sendOrderElem/external:order/external:orderSpec/itemName</to>
+                </copy>
+                <copy>
+                    <from>$orderElem/orderSpec/price</from>
+                    <to>$sendOrderElem/external:order/external:orderSpec/price</to>
+                </copy>
+                <copy> 
+                    <from>$sendOrderElem</from>
                     <to variable="sendOrderRequest" part="parameters"/>
                 </copy>
             </assign>
@@ -139,17 +173,13 @@
                 outputVariable="sendOrderResponse"
              />
             
-             <assign>
+            <assign>
                 <copy>
-                    <from>$sendOrderResponse.parameters</from>
-                    <to>$sendOrderResponseElem</to>
+                    <from>ode:rename($sendOrderResponse.parameters/external:order, QName("http://order/test.wsdl", "order:order"))</from>
+                    <to>$sendOrderResponse.parameters/external:order</to>
+                    <!-- <to variable="orderVar" part="order"/> -->
                 </copy>
-                 <copy>
-                     <from>$sendOrderResponseElem/order</from>
-                     <to>$sendOrderResponseElem/order</to>
-                 </copy> 
-             </assign>
-            
+            </assign>
 
             <reply name="end"  
                 partnerLink="orderPartnerLink"
@@ -157,9 +187,7 @@
                 operation="sendOrder"
                 variable="orderVar"/>
         </sequence> 
-        
-        
-      
+
         <sequence>
             <receive
                 name="start"

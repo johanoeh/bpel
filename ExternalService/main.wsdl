@@ -35,6 +35,7 @@
                     <xsd:element name="orderID" type="xsd:string"/>
                     <xsd:element name="customerID" type="xsd:string"></xsd:element>
                     <xsd:element name="itemName" type="xsd:string"/>
+                    <xsd:element name="price" type="xsd:string"/>
                 </xsd:sequence>
             </xsd:complexType>
             

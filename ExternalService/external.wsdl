@@ -36,7 +36,7 @@
                     <xs:element name="orderID" type="xs:string"/>
                     <xs:element name="customerID" type="xs:string"/>
                     <xs:element name="itemName" type="xs:string"/>
-                    <xs:element name="price" type="xsd:string"/>
+                    <xs:element name="price" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             
